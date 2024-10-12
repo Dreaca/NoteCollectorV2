@@ -1,40 +1,55 @@
 package org.example.notecollectorv2.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
+import org.apache.catalina.filters.CorsFilter;
+import org.example.notecollectorv2.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-public class SecurityConfig {
-    @Value("${secure.username}")
-    private String username;
-    @Value("${secure.password}")
-    private String password;
-    @Value("${secure.roles}")
-    private String roles;
+@RequiredArgsConstructor
 
+public class SecurityConfig {
+
+    private final UserService userService;
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests()
-                .anyRequest().authenticated()
-                .and()
-                .httpBasic();
+                .authorizeHttpRequests(req ->req.requestMatchers("api/v1/auth/**")
+                .permitAll()
+                .anyRequest()
+                .authenticated()
+                )
+                .sessionManagement(session ->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore();
         return http.build();
-    };
+    }
     @Bean
-    public InMemoryUserDetailsManager userDetailsManager() {
-        UserDetails userDetails = User.withDefaultPasswordEncoder()//principle user
-                .username(username)
-                .password(password)
-                .roles(roles)
-                .build();
-        return new InMemoryUserDetailsManager(userDetails);
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider dap = new DaoAuthenticationProvider();
+        dap.setUserDetailsService(userService.getUserDetailsService());
+        dap.setPasswordEncoder(passwordEncoder());
+        return dap;
+    }
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 }

@@ -11,6 +11,7 @@ import org.example.notecollectorv2.exceptions.UserNotFoundException;
 import org.example.notecollectorv2.service.UserService;
 import org.example.notecollectorv2.util.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -69,5 +70,11 @@ public class UserServiceImpl implements UserService {
             tmpUser.get().setUserPassword(userDTO.getUserPassword());
             tmpUser.get().setProfilePicture(userDTO.getProfilePicture());
         }
+    }
+
+    @Override
+    public UserDetailsService getUserDetailsService() {
+        return userName -> userDao.findByEmail(userName)
+                .orElseThrow(()->new UserNotFoundException("User with id"+userName+" is not available"));
     }
 }
