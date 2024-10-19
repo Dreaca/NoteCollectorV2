@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.notecollectorv2.dto.UserStatus;
+import org.example.notecollectorv2.entity.Role;
 
 import java.util.List;
 @Data
@@ -16,5 +17,6 @@ public class UserDTO implements UserStatus {
     private String userEmail;
     private String userPassword;
     private String profilePicture;
+    private Role role;
     private List<NoteDTO> notes;
 }
