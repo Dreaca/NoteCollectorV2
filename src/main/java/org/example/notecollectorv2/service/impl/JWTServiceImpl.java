@@ -11,7 +11,6 @@ import org.springframework.cglib.core.internal.Function;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,7 +18,7 @@ import java.util.Map;
 @Service
 public class JWTServiceImpl implements JWTService {
     @Value("${spring.jwtKey}")
-    static String secrectKey;
+    private String secretKey;
 
     @Override
     public String extractUsername(String token) {
@@ -40,7 +39,7 @@ public class JWTServiceImpl implements JWTService {
                 .setSubject(user.getUsername())
                 .setIssuedAt(now)
                 .setExpiration(expiration)
-                .signWith(SignatureAlgorithm.ES256,getSecretKey()).compact();
+                .signWith(SignatureAlgorithm.HS256,getSecretKey()).compact();
     }
     @Override
     public boolean validateToken(String token, UserDetails user) {
@@ -62,7 +61,7 @@ public class JWTServiceImpl implements JWTService {
     }
 
     private Key getSecretKey() {
-        byte[] decode = Decoders.BASE64.decode(secrectKey);
+        byte[] decode = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(decode);
     }
     private boolean isTokenExpired(String token) {
@@ -82,7 +81,7 @@ public class JWTServiceImpl implements JWTService {
                 .setSubject(user.getUsername())
                 .setIssuedAt(now)
                 .setExpiration(reFreshExpiration)
-                .signWith(SignatureAlgorithm.ES256,getSecretKey()).compact();
+                .signWith(SignatureAlgorithm.HS256,getSecretKey()).compact();
 
     }
 

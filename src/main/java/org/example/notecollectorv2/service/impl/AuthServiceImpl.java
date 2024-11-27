@@ -9,6 +9,9 @@ import org.example.notecollectorv2.secure.SignIn;
 import org.example.notecollectorv2.service.AuthService;
 import org.example.notecollectorv2.service.JWTService;
 import org.example.notecollectorv2.util.Mapping;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,9 +20,13 @@ public class AuthServiceImpl implements AuthService {
     private final UserDao userDao;
     private final Mapping mapping;
     private final JWTService jwtService;
+    private final AuthenticationManager authenticationManager;
     @Override
     public JWTAuthResponse signIn(SignIn signIn) {
-        return null;
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signIn.getEmail(), signIn.getPassword()));
+        UserEntity user = userDao.findByEmail(signIn.getEmail()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        String generateToken = jwtService.generateToken(user);
+        return JWTAuthResponse.builder().token(generateToken).build();
     }
 
     @Override
@@ -34,6 +41,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public JWTAuthResponse refreshToken(String accessToken) {
-        return null;
+        String username = jwtService.extractUsername(accessToken);
+        UserEntity user = userDao.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        String refreshToken = jwtService.refreshToken(user);
+        return JWTAuthResponse.builder().token(refreshToken).build();
     }
 }

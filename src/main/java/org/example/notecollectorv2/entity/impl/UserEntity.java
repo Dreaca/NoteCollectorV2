@@ -26,7 +26,7 @@ public class UserEntity implements SuperEntity, UserDetails {
     private String userFirstName;
     private String userLastName;
     @Column(unique=true)
-    private String userEmail;
+    private String email;
     private String userPassword;
     @Column(columnDefinition = "LONGTEXT")
     private String profilePicture;
@@ -49,7 +49,7 @@ public class UserEntity implements SuperEntity, UserDetails {
 
     @Override
     public String getUsername() {
-        return userEmail;
+        return email;
     }
 
     @Override

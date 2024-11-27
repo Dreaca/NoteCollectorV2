@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
         if(tmpUser.isPresent()) {
             tmpUser.get().setUserFirstName(userDTO.getUserFirstName());
             tmpUser.get().setUserLastName(userDTO.getUserLastName());
-            tmpUser.get().setUserEmail(userDTO.getUserEmail());
+            tmpUser.get().setEmail(userDTO.getUserEmail());
             tmpUser.get().setUserPassword(userDTO.getUserPassword());
             tmpUser.get().setProfilePicture(userDTO.getProfilePicture());
         }

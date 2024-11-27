@@ -10,6 +10,7 @@ import org.example.notecollectorv2.service.AuthService;
 import org.example.notecollectorv2.service.UserService;
 import org.example.notecollectorv2.util.AppUtil;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,7 @@ public class AuthUserController {
     public ResponseEntity<JWTAuthResponse> saveUser(
             @RequestPart("userFirstName") String userFirstName,
             @RequestPart("userLastName") String userLastName,
-            @RequestPart("userEmail")String userEmail,
+            @RequestPart("email")String userEmail,
             @RequestPart("userPassword")String userPassword,
             @RequestPart("role") String role,
             @RequestPart("profilePicture") MultipartFile profilePicture
@@ -65,12 +66,13 @@ public class AuthUserController {
         }
 
     }
-    @PutMapping("/signin")
+    @PutMapping(value="/signin",consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<JWTAuthResponse> authenticateUser(@RequestBody SignIn signIn){
+        return ResponseEntity.ok(authService.signIn(signIn));
     }
 
     @PostMapping("/refreshToken")
     public ResponseEntity<JWTAuthResponse> refreshToken(@RequestBody String refreshToken){
-
+        return ResponseEntity.ok(authService.refreshToken(refreshToken));
     }
 }
